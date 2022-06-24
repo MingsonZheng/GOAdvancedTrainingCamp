@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -40,16 +38,25 @@ func NewHttpServer(name string) Server {
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	req := &signUpReq{}
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		fmt.Fprintf(w, "read body failed: %v", err)
-		// 要返回掉，不然就会继续执行后面的代码
-		return
+	//body, err := io.ReadAll(r.Body)
+	//if err != nil {
+	//	fmt.Fprintf(w, "read body failed: %v", err)
+	//	// 要返回掉，不然就会继续执行后面的代码
+	//	return
+	//}
+	//err = json.Unmarshal(body, req)
+	//if err != nil {
+	//	fmt.Fprintf(w, "deserialized failed: %v", err)
+	//	// 要返回掉，不然就会继续执行后面的代码
+	//	return
+	//}
+	ctx := &Context{
+		W: w,
+		R: r,
 	}
-	err = json.Unmarshal(body, req)
+	err := ctx.ReadJson(req)
 	if err != nil {
-		fmt.Fprintf(w, "deserialized failed: %v", err)
-		// 要返回掉，不然就会继续执行后面的代码
+		fmt.Fprintf(w, "err: %v", err)
 		return
 	}
 
@@ -60,11 +67,17 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	resp := &commonResponse{
 		Data: 123,
 	}
-	respJson, err := json.Marshal(resp)
-	if err != nil {
 
+	//w.WriteHeader(http.StatusOK)
+	//respJson, err := json.Marshal(resp)
+	//if err != nil {
+	//
+	//}
+	//fmt.Fprintf(w, string(respJson)) // []byte 和 string 可以互转
+	err = ctx.WriteJson(http.StatusOK, resp)
+	if err != nil {
+		fmt.Printf("写入响应失败：%v", err)
 	}
-	fmt.Fprintf(w, string(respJson)) // []byte 和 string 可以互转
 }
 
 type signUpReq struct {
