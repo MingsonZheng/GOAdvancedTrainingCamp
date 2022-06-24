@@ -5,6 +5,16 @@ import (
 	"net/http"
 )
 
+type ServerV3 interface {
+
+	// RouteV3 设定一个路由，命中该路由的会执行 handlerFunc 的代码
+	// method POST, GET, PUT
+	RouteV3(method string, pattern string, handlerFunc func(ctx *Context))
+
+	// StartV3 启动我们的服务器
+	StartV3(address string) error
+}
+
 type ServerV2 interface {
 
 	// RouteV2 设定一个路由，命中该路由的会执行 handlerFunc 的代码
@@ -25,6 +35,12 @@ type Server interface {
 	Start(address string) error
 }
 
+// sdkHttpServerV3 这个是基于 net/http 这个包实现的 http server
+type sdkHttpServerV3 struct {
+	// Name server 的名字，给个标记，日志输出的时候用的上
+	Name string
+}
+
 // sdkHttpServerV2 这个是基于 net/http 这个包实现的 http server
 type sdkHttpServerV2 struct {
 	// Name server 的名字，给个标记，日志输出的时候用的上
@@ -35,6 +51,18 @@ type sdkHttpServerV2 struct {
 type sdkHttpServer struct {
 	// Name server 的名字，给个标记，日志输出的时候用的上
 	Name string
+}
+
+// RouteV3 注册路由
+func (s *sdkHttpServerV3) RouteV3(method string, pattern string, handlerFunc func(ctx *Context)) {
+	http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		//ctx := &Context{
+		//	W: w,
+		//	R: r,
+		//}
+		ctx := NewContext(w, r)
+		handlerFunc(ctx) // 调用传进来的函数，函数的入参是在这个方法里面构建的
+	})
 }
 
 func (s *sdkHttpServerV2) RouteV2(pattern string, handlerFunc func(ctx *Context)) {
@@ -52,12 +80,23 @@ func (s *sdkHttpServer) Route(pattern string, handlerFunc http.HandlerFunc) {
 	http.HandleFunc(pattern, handlerFunc)
 }
 
+func (s *sdkHttpServerV3) StartV3(address string) error {
+	return http.ListenAndServe(address, nil)
+}
+
 func (s *sdkHttpServerV2) StartV2(address string) error {
 	return http.ListenAndServe(address, nil)
 }
 
 func (s *sdkHttpServer) Start(address string) error {
 	return http.ListenAndServe(address, nil)
+}
+
+func NewHttpServerV3(name string) ServerV3 {
+	// 返回一个实际类型是我实现接口的时候，需要取址
+	return &sdkHttpServerV3{
+		Name: name,
+	}
 }
 
 func NewHttpServerV2(name string) ServerV2 {
