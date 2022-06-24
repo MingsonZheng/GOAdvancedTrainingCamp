@@ -45,3 +45,14 @@ func (c *Context) OkJson(resp interface{}) error {
 func (c *Context) SystemErrorJson(resp interface{}) error {
 	return c.WriteJson(http.StatusInternalServerError, resp)
 }
+
+func (c *Context) BadRequestJson(resp interface{}) error {
+	return c.WriteJson(http.StatusBadRequest, resp)
+}
+
+func NewContext(w http.ResponseWriter, r *http.Request) *Context {
+	return &Context{
+		W: w,
+		R: r,
+	}
+}

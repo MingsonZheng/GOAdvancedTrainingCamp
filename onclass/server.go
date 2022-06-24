@@ -5,6 +5,16 @@ import (
 	"net/http"
 )
 
+type ServerV2 interface {
+
+	// RouteV2 设定一个路由，命中该路由的会执行 handlerFunc 的代码
+	//Route(pattern string, handlerFunc http.HandlerFunc)
+	RouteV2(pattern string, handlerFunc func(ctx *Context))
+
+	// StartV2 启动我们的服务器
+	StartV2(address string) error
+}
+
 // Server 是 http server 的顶级抽象
 type Server interface {
 
@@ -15,24 +25,81 @@ type Server interface {
 	Start(address string) error
 }
 
+// sdkHttpServerV2 这个是基于 net/http 这个包实现的 http server
+type sdkHttpServerV2 struct {
+	// Name server 的名字，给个标记，日志输出的时候用的上
+	Name string
+}
+
 // sdkHttpServer 这个是基于 net/http 这个包实现的 http server
 type sdkHttpServer struct {
 	// Name server 的名字，给个标记，日志输出的时候用的上
 	Name string
 }
 
+func (s *sdkHttpServerV2) RouteV2(pattern string, handlerFunc func(ctx *Context)) {
+	http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		//ctx := &Context{
+		//	W: w,
+		//	R: r,
+		//}
+		ctx := NewContext(w, r)
+		handlerFunc(ctx) // 调用传进来的函数，函数的入参是在这个方法里面构建的
+	})
+}
+
 func (s *sdkHttpServer) Route(pattern string, handlerFunc http.HandlerFunc) {
 	http.HandleFunc(pattern, handlerFunc)
+}
+
+func (s *sdkHttpServerV2) StartV2(address string) error {
+	return http.ListenAndServe(address, nil)
 }
 
 func (s *sdkHttpServer) Start(address string) error {
 	return http.ListenAndServe(address, nil)
 }
 
+func NewHttpServerV2(name string) ServerV2 {
+	// 返回一个实际类型是我实现接口的时候，需要取址
+	return &sdkHttpServerV2{
+		Name: name,
+	}
+}
+
 func NewHttpServer(name string) Server {
 	// 返回一个实际类型是我实现接口的时候，需要取址
 	return &sdkHttpServer{
 		Name: name,
+	}
+}
+
+func SignUpV2(ctx *Context) {
+	req := &signUpReq{}
+
+	//ctx := &Context{
+	//	W: w,
+	//	R: r,
+	//}
+	err := ctx.ReadJson(req)
+	if err != nil {
+		//fmt.Fprintf(w, "err: %v", err)
+		ctx.BadRequestJson(err)
+		return
+	}
+
+	// 返回一个虚拟的 user id 表示注册成功了
+	//fmt.Fprintf(w, "%d", 123)
+	fmt.Fprintf(ctx.W, "%d", 123)
+
+	// 返回 json 对象
+	resp := &commonResponse{
+		Data: 123,
+	}
+
+	err = ctx.WriteJson(http.StatusOK, resp)
+	if err != nil {
+		fmt.Printf("写入响应失败：%v", err)
 	}
 }
 
