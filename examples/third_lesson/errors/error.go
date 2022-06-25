@@ -19,17 +19,20 @@ func (m *MyError) Error() string {
 	return "Hello, it's my error"
 }
 
-func ErrorsPkg()  {
+func ErrorsPkg() {
 	err := &MyError{}
 	// 使用 %w 占位符，返回的是一个新错误
 	// wrappedErr 是一个新类型，fmt.wrapError
+	// fmt.PrintXXXX 输出到控制台
+	// fmt.SprintXX 返回 string
+	// fmt.ErrorXXX error
 	wrappedErr := fmt.Errorf("this is an wrapped error %w", err)
 
 	// 再解出来
 	if err == errors.Unwrap(wrappedErr) {
 		fmt.Println("unwrapped")
 	}
-	
+
 	if errors.Is(wrappedErr, err) {
 		// 虽然被包了一下，但是 Is 会逐层解除包装，判断是不是该错误
 		fmt.Println("wrapped is err")
@@ -42,4 +45,3 @@ func ErrorsPkg()  {
 		fmt.Println("convert error")
 	}
 }
-
