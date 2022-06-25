@@ -38,7 +38,8 @@ type Server interface {
 // sdkHttpServerV3 这个是基于 net/http 这个包实现的 http server
 type sdkHttpServerV3 struct {
 	// Name server 的名字，给个标记，日志输出的时候用的上
-	Name string
+	Name    string
+	handler *HandlerBaseOnMap
 }
 
 // sdkHttpServerV2 这个是基于 net/http 这个包实现的 http server
@@ -55,14 +56,16 @@ type sdkHttpServer struct {
 
 // RouteV3 注册路由
 func (s *sdkHttpServerV3) RouteV3(method string, pattern string, handlerFunc func(ctx *Context)) {
-	http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
-		//ctx := &Context{
-		//	W: w,
-		//	R: r,
-		//}
-		ctx := NewContext(w, r)
-		handlerFunc(ctx) // 调用传进来的函数，函数的入参是在这个方法里面构建的
-	})
+	//http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+	//	//ctx := &Context{
+	//	//	W: w,
+	//	//	R: r,
+	//	//}
+	//	ctx := NewContext(w, r)
+	//	handlerFunc(ctx) // 调用传进来的函数，函数的入参是在这个方法里面构建的
+	//})
+	key := s.handler.key(method, pattern)
+	s.handler.handlers[key] = handlerFunc
 }
 
 func (s *sdkHttpServerV2) RouteV2(pattern string, handlerFunc func(ctx *Context)) {
@@ -81,6 +84,8 @@ func (s *sdkHttpServer) Route(pattern string, handlerFunc http.HandlerFunc) {
 }
 
 func (s *sdkHttpServerV3) StartV3(address string) error {
+	handler := s.handler
+	http.Handle("/", handler)
 	return http.ListenAndServe(address, nil)
 }
 
