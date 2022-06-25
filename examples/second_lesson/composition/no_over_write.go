@@ -7,11 +7,12 @@ func main() {
 		Parent{},
 	}
 
+	// java: I am Son
+	// golang: I am Parent
 	son.SayHello()
 }
 
 type Parent struct {
-
 }
 
 func (p Parent) SayHello() {
@@ -26,8 +27,7 @@ type Son struct {
 	Parent
 }
 
-// 定义了自己的 Name() 方法
+// Name 定义了自己的 Name() 方法
 func (s Son) Name() string {
 	return "Son"
 }
-

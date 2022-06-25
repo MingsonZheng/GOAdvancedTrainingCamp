@@ -12,10 +12,13 @@ type Swimming interface {
 }
 
 type Duck interface {
-	// 鸭子是会游泳的，所以这里组合了它
+	// Swimming 鸭子是会游泳的，所以这里组合了它
 	Swimming
 }
 
+type Concrete2 struct {
+	*Base
+}
 
 type Base struct {
 	Name string
@@ -25,11 +28,7 @@ type Concrete1 struct {
 	Base
 }
 
-type Concrete2 struct {
-	*Base
-}
-
-func (c Concrete1) SayHello() {
+func (c *Concrete1) SayHello() {
 	// c.Name 直接访问了Base的Name字段
 	fmt.Printf("I am base and my name is: %s \n", c.Name)
 	// 这样也是可以的
@@ -37,8 +36,12 @@ func (c Concrete1) SayHello() {
 
 	// 调用了被组合的
 	c.Base.SayHello()
+	c.SayGoodBye()
 }
 
 func (b *Base) SayHello() {
+	fmt.Printf("I am base and my name is: %s \n", b.Name)
+}
+func (b *Base) SayGoodBye() {
 	fmt.Printf("I am base and my name is: %s \n", b.Name)
 }
