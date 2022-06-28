@@ -15,3 +15,8 @@ func main() {
 		fmt.Println("ccc")
 	}()
 }
+
+// 输出
+// ccc
+// bbb
+// aaa

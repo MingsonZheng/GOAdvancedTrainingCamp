@@ -5,7 +5,7 @@ import "fmt"
 func main() {
 	defer func() {
 		if data := recover(); data != nil {
-			fmt.Printf("hello, panic: %v\n", data)
+			fmt.Printf("hello, panic: %v\n", data) // hello, panic: Boom
 		}
 		fmt.Println("恢复之后从这里继续执行")
 	}()

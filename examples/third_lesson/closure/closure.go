@@ -37,3 +37,14 @@ func Delay() {
 		fn()
 	}
 }
+
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
+//hello, this is : 10
