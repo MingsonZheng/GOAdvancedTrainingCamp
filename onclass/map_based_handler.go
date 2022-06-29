@@ -19,17 +19,17 @@ type HandlerBasedOnMap struct {
 	handlers map[string]func(ctx *Context)
 }
 
-//// RouteV3 注册路由
-//func (s *sdkHttpServerV3) RouteV3(method string, pattern string, handlerFunc func(ctx *Context)) {
-//	key := s.handler.key(method, pattern)
-//	s.handler.handlers[key] = handlerFunc
-//}
-
 // RouteV4 注册路由
 func (h *HandlerBasedOnMap) RouteV4(method string, pattern string, handlerFunc func(ctx *Context)) {
 	key := h.key(method, pattern)
 	h.handlers[key] = handlerFunc
 }
+
+//// RouteV3 注册路由
+//func (s *sdkHttpServerV3) RouteV3(method string, pattern string, handlerFunc func(ctx *Context)) {
+//	key := s.handler.key(method, pattern)
+//	s.handler.handlers[key] = handlerFunc
+//}
 
 func (h *HandlerBasedOnMap) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	key := h.key(request.Method, request.URL.Path)

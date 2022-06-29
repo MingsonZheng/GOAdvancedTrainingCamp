@@ -49,6 +49,7 @@ type sdkHttpServerV4 struct {
 	Name string
 	//handler *HandlerBasedOnMap
 	handler Handler
+	root    Filter
 }
 
 // sdkHttpServerV3 这个是基于 net/http 这个包实现的 http server
@@ -124,11 +125,26 @@ func (s *sdkHttpServer) Start(address string) error {
 	return http.ListenAndServe(address, nil)
 }
 
-func NewHttpServerV4(name string) ServerV4 {
+func NewHttpServerV4(name string, builders ...FilterBuilder) ServerV4 {
+	//// 返回一个实际类型是我实现接口的时候，需要取址
+	//return &sdkHttpServerV4{
+	//	Name:    name,
+	//	handler: NewHandlerBasedOnMap(),
+	//}
+	handler := NewHandlerBasedOnMap()
+	var root Filter = func(c *Context) {
+		handler.ServeHTTP(c.W, c.R)
+	}
+	// 从后往前调用 method，所以要从后往前组装好
+	for i := len(builders); i >= 0; i-- {
+		b := builders[i]
+		root = b(root)
+	}
 	// 返回一个实际类型是我实现接口的时候，需要取址
 	return &sdkHttpServerV4{
 		Name:    name,
-		handler: NewHandlerBasedOnMap(),
+		handler: handler,
+		root:    root,
 	}
 }
 
