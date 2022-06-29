@@ -1,2 +1,2 @@
-# toy-web
+# GOAdvancedTrainingCamp
 GOAdvancedTrainingCamp
