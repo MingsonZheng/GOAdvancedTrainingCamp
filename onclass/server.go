@@ -136,9 +136,10 @@ func NewHttpServerV4(name string, builders ...FilterBuilder) ServerV4 {
 	//	handler: NewHandlerBasedOnMap(),
 	//}
 	handler := NewHandlerBasedOnMap()
-	var root Filter = func(c *Context) {
-		handler.ServeHTTP(c)
-	}
+	//var root Filter = func(c *Context) {
+	//	handler.ServeHTTP(c.W, c.R)
+	//}
+	var root Filter = handler.ServeHTTP
 	// 从后往前调用 method，所以要从后往前组装好
 	for i := len(builders); i >= 0; i-- {
 		b := builders[i]
