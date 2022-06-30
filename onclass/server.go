@@ -108,12 +108,16 @@ func (s *sdkHttpServer) Route(pattern string, handlerFunc http.HandlerFunc) {
 }
 
 func (s *sdkHttpServerV4) StartV4(address string) error {
-	http.Handle("/", s.handler)
+	//http.Handle("/", s.handler)
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		c := NewContext(writer, request)
+		s.root(c)
+	})
 	return http.ListenAndServe(address, nil)
 }
 
 func (s *sdkHttpServerV3) StartV3(address string) error {
-	http.Handle("/", s.handler)
+	//http.Handle("/", s.handler)
 	return http.ListenAndServe(address, nil)
 }
 
@@ -133,7 +137,7 @@ func NewHttpServerV4(name string, builders ...FilterBuilder) ServerV4 {
 	//}
 	handler := NewHandlerBasedOnMap()
 	var root Filter = func(c *Context) {
-		handler.ServeHTTP(c.W, c.R)
+		handler.ServeHTTP(c)
 	}
 	// 从后往前调用 method，所以要从后往前组装好
 	for i := len(builders); i >= 0; i-- {

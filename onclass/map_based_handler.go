@@ -9,7 +9,8 @@ type Routable interface {
 }
 
 type Handler interface {
-	http.Handler
+	//ServeHTTP http.Handler
+	ServeHTTP(c *Context)
 	//Routable Route(method string, pattern string, handlerFunc func(ctx *Context)) // server 可以把 Route 委托给这边的 Handler
 	Routable
 }
@@ -31,16 +32,27 @@ func (h *HandlerBasedOnMap) RouteV4(method string, pattern string, handlerFunc f
 //	s.handler.handlers[key] = handlerFunc
 //}
 
-func (h *HandlerBasedOnMap) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	key := h.key(request.Method, request.URL.Path)
+func (h *HandlerBasedOnMap) ServeHTTP(c *Context) {
+	key := h.key(c.R.Method, c.R.URL.Path)
 	// 判定路由是否已经注册
 	if handler, ok := h.handlers[key]; ok {
-		handler(NewContext(writer, request))
+		handler(c)
 	} else {
-		writer.WriteHeader(http.StatusNotFound)
-		writer.Write([]byte("Not Found"))
+		c.W.WriteHeader(http.StatusNotFound)
+		c.W.Write([]byte("Not Found"))
 	}
 }
+
+//func (h *HandlerBasedOnMap) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+//	key := h.key(request.Method, request.URL.Path)
+//	// 判定路由是否已经注册
+//	if handler, ok := h.handlers[key]; ok {
+//		handler(NewContext(writer, request))
+//	} else {
+//		writer.WriteHeader(http.StatusNotFound)
+//		writer.Write([]byte("Not Found"))
+//	}
+//}
 
 func (h *HandlerBasedOnMap) key(method string, pattern string) string {
 	return method + "#" + pattern
