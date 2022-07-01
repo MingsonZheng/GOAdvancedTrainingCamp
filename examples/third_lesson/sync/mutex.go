@@ -6,13 +6,18 @@ import (
 
 var mutex sync.Mutex
 var rwMutex sync.RWMutex
+
 func Mutex() {
 	mutex.Lock()
+	// 你的业务代码
+	// 然后你这里 panic 掉了
+	// 所以 mutex 解锁需要使用 defer
 	defer mutex.Unlock()
 	// 你的代码
 }
 
-func RwMutex()  {
+// RwMutex 一般情况下都用读写锁
+func RwMutex() {
 	// 加读锁
 	rwMutex.RLock()
 	defer rwMutex.RUnlock()
@@ -22,8 +27,8 @@ func RwMutex()  {
 	defer rwMutex.Unlock()
 }
 
-// 不可重入例子
-func Failed1()  {
+// Failed1 不可重入例子
+func Failed1() {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -33,8 +38,8 @@ func Failed1()  {
 	defer mutex.Unlock()
 }
 
-// 不可升级
-func Failed2()  {
+// Failed2 不可升级
+func Failed2() {
 	rwMutex.RLock()
 	defer rwMutex.RUnlock()
 

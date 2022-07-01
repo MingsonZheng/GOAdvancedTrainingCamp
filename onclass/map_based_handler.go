@@ -2,10 +2,13 @@ package main
 
 import (
 	"net/http"
+	"sync"
 )
 
+type handlerFunc func(ctx *Context)
+
 type Routable interface {
-	RouteV4(method string, pattern string, handlerFunc func(ctx *Context)) // server 可以把 Route 委托给这边的 Handler
+	RouteV4(method string, pattern string, handlerFunc handlerFunc) // server 可以把 Route 委托给这边的 Handler
 }
 
 type Handler interface {
@@ -17,13 +20,15 @@ type Handler interface {
 
 type HandlerBasedOnMap struct {
 	// key 应该是 method + url
-	handlers map[string]func(ctx *Context)
+	//handlers map[string]func(ctx *Context)
+	handlers sync.Map
 }
 
 // RouteV4 注册路由
 func (h *HandlerBasedOnMap) RouteV4(method string, pattern string, handlerFunc func(ctx *Context)) {
 	key := h.key(method, pattern)
-	h.handlers[key] = handlerFunc
+	//h.handlers[key] = handlerFunc
+	h.handlers.Store(key, handlerFunc)
 }
 
 //// RouteV3 注册路由
@@ -33,14 +38,23 @@ func (h *HandlerBasedOnMap) RouteV4(method string, pattern string, handlerFunc f
 //}
 
 func (h *HandlerBasedOnMap) ServeHTTP(c *Context) {
-	key := h.key(c.R.Method, c.R.URL.Path)
-	// 判定路由是否已经注册
-	if handler, ok := h.handlers[key]; ok {
-		handler(c)
-	} else {
+	//key := h.key(c.R.Method, c.R.URL.Path)
+	//// 判定路由是否已经注册
+	//if handler, ok := h.handlers[key]; ok {
+	//	handler(c)
+	//} else {
+	//	c.W.WriteHeader(http.StatusNotFound)
+	//	c.W.Write([]byte("Not Found"))
+	//}
+	request := c.R
+	key := h.key(request.Method, request.URL.Path)
+	handler, ok := h.handlers.Load(key)
+	if !ok {
 		c.W.WriteHeader(http.StatusNotFound)
 		c.W.Write([]byte("Not Found"))
+		return
 	}
+	handler.(func(c *Context))(c)
 }
 
 //func (h *HandlerBasedOnMap) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -60,6 +74,7 @@ func (h *HandlerBasedOnMap) key(method string, pattern string) string {
 
 func NewHandlerBasedOnMap() Handler {
 	return &HandlerBasedOnMap{
+		//handlers: make(map[string]func(ctx *Context)),
 		handlers: make(map[string]func(ctx *Context)),
 	}
 }
