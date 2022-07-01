@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"net/http"
+	"strings"
+)
 
 type HandlerBasedOnTree struct {
 	root *node
@@ -15,11 +18,41 @@ type node struct {
 	handler handlerFunc
 }
 
+// ServeHTTP 就是从树里面找节点
+// 找到了就执行
 func (h *HandlerBasedOnTree) ServeHTTP(c *Context) {
-	//TODO implement me
-	panic("implement me")
+	handler, found := h.findRouter(c.R.URL.Path)
+	if !found {
+		c.W.WriteHeader(http.StatusNotFound)
+		_, _ = c.W.Write([]byte("Not Found"))
+		return
+	}
+	handler(c)
 }
 
+func (h *HandlerBasedOnTree) findRouter(path string) (handlerFunc, bool) {
+	// 去除头尾可能有的/，然后按照/切割成段
+	paths := strings.Split(strings.Trim(path, "/"), "/")
+	cur := h.root
+	for _, p := range paths {
+		// 从子节点里边找一个匹配到了当前 path 的节点
+		matchChild, found := h.findMatchChild(cur, p)
+		if !found {
+			return nil, false
+		}
+		cur = matchChild
+	}
+	// 到这里，应该是找完了
+	if cur.handler == nil {
+		// 到达这里是因为这种场景
+		// 比如说你注册了 /user/profile
+		// 然后你访问 /user
+		return nil, false
+	}
+	return cur.handler, true
+}
+
+// RouteV4 就相当于往树里面插入节点
 func (h *HandlerBasedOnTree) RouteV4(method string, pattern string, handlerFunc handlerFunc) {
 	// 将pattern按照URL的分隔符切割
 	// 例如，/user/friends 将变成 [user, friends]
