@@ -72,14 +72,14 @@ type sdkHttpServer struct {
 }
 
 // RouteV4 注册路由
-func (s *sdkHttpServerV4) RouteV4(method string, pattern string, handlerFunc func(ctx *Context)) {
+func (s *sdkHttpServerV4) RouteV4(method string, pattern string, handlerFunc handlerFunc) {
 	//key := s.handler.key(method, pattern)
 	//s.handler.handlers[key] = handlerFunc
 	s.handler.RouteV4(method, pattern, handlerFunc)
 }
 
 // RouteV3 注册路由
-func (s *sdkHttpServerV3) RouteV3(method string, pattern string, handlerFunc func(ctx *Context)) {
+func (s *sdkHttpServerV3) RouteV3(method string, pattern string, handlerFunc handlerFunc) {
 	//http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 	//	//ctx := &Context{
 	//	//	W: w,
@@ -88,8 +88,11 @@ func (s *sdkHttpServerV3) RouteV3(method string, pattern string, handlerFunc fun
 	//	ctx := NewContext(w, r)
 	//	handlerFunc(ctx) // 调用传进来的函数，函数的入参是在这个方法里面构建的
 	//})
-	key := s.handler.key(method, pattern)
-	s.handler.handlers[key] = handlerFunc
+
+	//key := s.handler.key(method, pattern)
+	//s.handler.handlers[key] = handlerFunc
+
+	s.handler.RouteV4(method, pattern, handlerFunc)
 }
 
 func (s *sdkHttpServerV2) RouteV2(pattern string, handlerFunc func(ctx *Context)) {

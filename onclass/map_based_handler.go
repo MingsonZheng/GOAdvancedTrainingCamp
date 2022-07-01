@@ -25,7 +25,7 @@ type HandlerBasedOnMap struct {
 }
 
 // RouteV4 注册路由
-func (h *HandlerBasedOnMap) RouteV4(method string, pattern string, handlerFunc func(ctx *Context)) {
+func (h *HandlerBasedOnMap) RouteV4(method string, pattern string, handlerFunc handlerFunc) {
 	key := h.key(method, pattern)
 	//h.handlers[key] = handlerFunc
 	h.handlers.Store(key, handlerFunc)
@@ -75,6 +75,6 @@ func (h *HandlerBasedOnMap) key(method string, pattern string) string {
 func NewHandlerBasedOnMap() Handler {
 	return &HandlerBasedOnMap{
 		//handlers: make(map[string]func(ctx *Context)),
-		handlers: make(map[string]func(ctx *Context)),
+		handlers: sync.Map{},
 	}
 }
