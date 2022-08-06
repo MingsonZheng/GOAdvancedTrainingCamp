@@ -27,6 +27,11 @@ const any = "*"
 // matchFunc 承担两个职责，一个是判断是否匹配，一个是在匹配之后
 // 将必要的数据写入到 Context
 // 所谓必要的数据，这里基本上是指路径参数
+// v1：==
+// v2：child.path = *
+// child.path 是路径参数，路径参数写入到 context 里面去
+// 正则：chiild.path.match(reg)
+// v3：抽象 matchFunc
 type matchFunc func(path string, c *Context) bool
 
 type node struct {
@@ -39,7 +44,7 @@ type node struct {
 
 	// 原始的 pattern。注意，它不是完整的pattern，
 	// 而是匹配到这个节点的pattern
-	pattern string
+	pattern  string
 	nodeType int
 }
 
@@ -55,11 +60,10 @@ func newStaticNode(path string) *node {
 	}
 }
 
-
 func newRootNode(method string) *node {
 	return &node{
 		children: make([]*node, 0, 2),
-		matchFunc: func( p string, c *Context) bool {
+		matchFunc: func(p string, c *Context) bool {
 			panic("never call me")
 		},
 		nodeType: nodeTypeRoot,
@@ -68,7 +72,7 @@ func newRootNode(method string) *node {
 }
 
 func newNode(path string) *node {
-	if path == "*"{
+	if path == "*" {
 		return newAnyNode()
 	}
 	if strings.HasPrefix(path, ":") {
@@ -111,13 +115,14 @@ func newParamNode(path string) *node {
 // 正则节点
 //func newRegNode(path string) *node {
 //	// 依据你的规则拿到正则表达式
+//  拿到正则表达式 p
 //	return &node{
 //		children: make([]*node, 0, 2),
 //		matchFunc: func(p string, c *Context) bool {
 //			// 怎么写？
+//			// 正则匹配一下 p
 //		},
 //		nodeType: nodeTypeParam,
 //		pattern: path,
 //	}
 //}
-
