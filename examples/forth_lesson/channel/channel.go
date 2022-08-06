@@ -8,9 +8,13 @@ import (
 func main() {
 	channelWithoutCache()
 	channelWithCache()
+
+	// make (slice, len, cap)
+	// make (map, cap)
+	// make (channel, cacheSize)
 }
 
-func channelWithCache()  {
+func channelWithCache() {
 	ch := make(chan string, 1)
 	go func() {
 
@@ -20,9 +24,9 @@ func channelWithCache()  {
 	}()
 
 	time.Sleep(2 * time.Second)
-	msg := <- ch
+	msg := <-ch
 	fmt.Println(time.Now().String() + msg)
-	msg = <- ch
+	msg = <-ch
 	fmt.Println(time.Now().String() + msg)
 	// 因为前面我们先睡了2秒，所以其实会有一个已经在缓冲了
 	// 当我们尝试输出的时候，这个输出间隔就会明显小于1秒
@@ -38,6 +42,6 @@ func channelWithoutCache() {
 	}()
 
 	// 这里比较容易写成 msg <- ch，编译会报错
-	msg := <- ch
+	msg := <-ch
 	fmt.Println(msg)
 }
