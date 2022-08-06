@@ -19,7 +19,7 @@ const (
 	nodeTypeReg
 
 	// 静态，即完全匹配
-	nodeTypeStatic
+	nodeTypeStatic // 最高优先级放到了最后
 )
 
 const any = "*"
@@ -34,8 +34,25 @@ const any = "*"
 // v3：抽象 matchFunc
 type matchFunc func(path string, c *Context) bool
 
+//// Node 将 Node 抽象为接口
+//type Node interface {
+//	Match() bool
+//	FindChild(string)
+//}
+
 type node struct {
+
+	// /user/*id 输出命中的模式 /user/:id
 	children []*node
+
+	// a -> ab, ac
+	//children2 map[byte][]*node
+
+	//// children 是有序的，查找的时候可以二分查找，但是对任意匹配的需要特殊处理
+	//children3 []*node
+
+	//// a -> 97 -> 0 -> []*node，二维数组，字符 a 对应 ASCII 为 97，把 97 对应到下标为 0 的数组，比 map 高效
+	//children4 [][]*node
 
 	// 如果这是叶子节点，
 	// 那么匹配上之后就可以调用该方法
@@ -126,3 +143,36 @@ func newParamNode(path string) *node {
 //		pattern: path,
 //	}
 //}
+
+// 允许用户定义自己的节点类型
+
+// 难点在于 newNode 的时候不知道使用哪种 nodeType
+//
+//type Factory func() *node
+//
+//var factories = map[int]Factory{}
+//
+//func RegisterFactory(t int, factory Factory) {
+//	factories[t] = factory
+//}
+
+// 只注册一个 Factory
+
+type Factory func(path string) *node
+
+var factory Factory
+
+func RegisterFactory(f Factory) {
+	factory = f
+}
+
+func main() {
+	RegisterFactory(func(path string) *node {
+		// 是我自定义格式的路由
+		if strings.HasPrefix(path, ":daming") {
+			return &node{}
+		} else {
+			return newNode(path)
+		}
+	})
+}

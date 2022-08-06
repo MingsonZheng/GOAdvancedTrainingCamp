@@ -14,7 +14,7 @@ type HandlerBasedOnTree struct {
 	forest map[string]*node
 }
 
-var supportMethods = [4]string {
+var supportMethods = [4]string{
 	http.MethodGet,
 	http.MethodPost,
 	http.MethodPut,
@@ -23,7 +23,7 @@ var supportMethods = [4]string {
 
 func NewHandlerBasedOnTree() Handler {
 	forest := make(map[string]*node, len(supportMethods))
-	for _, m :=range supportMethods {
+	for _, m := range supportMethods {
 		forest[m] = newRootNode(m)
 	}
 	return &HandlerBasedOnTree{
@@ -116,7 +116,7 @@ func (h *HandlerBasedOnTree) validatePattern(pattern string) error {
 	// 找到了 *
 	if pos > 0 {
 		// 必须是最后一个
-		if pos != len(pattern) - 1 {
+		if pos != len(pattern)-1 {
 			return ErrorInvalidRouterPattern
 		}
 		if pattern[pos-1] != '/' {
@@ -139,11 +139,17 @@ func (h *HandlerBasedOnTree) findMatchChild(root *node,
 		return nil, false
 	}
 
-	// type 也决定了它们的优先级
+	// /user/*
+	// /user/home
+	// 应该匹配第二条，更加具体，最左最长匹配原则
+	// type 也决定了它们的优先级，最高优先级放到了最后
+
+	// 这里，从候选项里面挑选出最合适的那个路由，这个也是可以扩展的
+	// type Selector interface {}
 	sort.Slice(candidates, func(i, j int) bool {
 		return candidates[i].nodeType < candidates[j].nodeType
 	})
-	return candidates[len(candidates) - 1], true
+	return candidates[len(candidates)-1], true
 }
 
 func (h *HandlerBasedOnTree) createSubTree(root *node, paths []string, handlerFn handlerFunc) {
@@ -155,4 +161,3 @@ func (h *HandlerBasedOnTree) createSubTree(root *node, paths []string, handlerFn
 	}
 	cur.handler = handlerFn
 }
-
