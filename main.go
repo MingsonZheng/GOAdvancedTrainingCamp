@@ -22,7 +22,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "这是创建用户")
 }
 
-func order(w http.ResponseWriter, r *http.Request)  {
+func order(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "这是订单")
 }
 
@@ -46,7 +46,7 @@ func main() {
 		"demo/static", "/static",
 		web.WithMoreExtension(map[string]string{
 			"mp3": "audio/mp3",
-		}), web.WithFileCache(1 << 20, 100))
+		}), web.WithFileCache(1<<20, 100))
 	// 访问 Get http://localhost:8080/static/forest.png
 	server.Route("GET", "/static/*", staticHandler.ServeStaticResource)
 
@@ -86,11 +86,8 @@ func main() {
 		})
 
 	// filterNames := ReadFromConfig
+	// logFilter, metricsFilter, shutdownFilter
 	// 匿名引入之后，就可以在这里按名索引 filter
 	//web.NewSdkHttpServerWithFilterNames("my-server", filterNames...)
 
 }
-
-
-
-

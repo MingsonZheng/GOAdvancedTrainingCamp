@@ -21,7 +21,12 @@ func MetricFilterBuilder(next Filter) Filter {
 }
 
 var builderMap = make(map[string]FilterBuilder, 4)
-func RegisterFilter(name string, builder FilterBuilder)  {
+
+// 我的配置文件是
+// filters: "logFilter, metricsFilter, shutdownFilter"
+// factory: "baseOnTreeHandlerFactory"
+
+func RegisterFilter(name string, builder FilterBuilder) {
 	// 情况1 有些时候你可能不允许重复注册，那么你要先检测是否已经注册过了
 	// 情况2 你会在并发的环境下调用这个方法，那么你应该
 	builderMap[name] = builder
