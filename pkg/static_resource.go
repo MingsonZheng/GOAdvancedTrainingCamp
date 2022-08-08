@@ -142,3 +142,31 @@ func getFileExt(name string) string {
 	}
 	return name[index+1:]
 }
+
+type User struct {
+	// ID 和名字是必要的
+	Id      int64
+	Name    string
+	Address string
+}
+
+type Option func(u *User)
+
+func NewUser(id int64, name string, opts ...Option) *User {
+	u := &User{
+		Id:   id,
+		Name: name,
+	}
+
+	for _, o := range opts {
+		o(u)
+	}
+
+	return u
+}
+
+func WithAddress(address string) Option {
+	return func(u *User) {
+		u.Address = address
+	}
+}
